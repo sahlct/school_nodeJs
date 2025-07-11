@@ -19,15 +19,24 @@ const upload = multer({ storage: storage });
 
 // Log audit entry for student actions
 const logAudit = async (action, studentId, performedBy, changes = null) => {
-    await prisma.auditLog.create({
-        data: {
-            action,
-            student_id: studentId,
-            performed_by: performedBy,
-            changes,
-            created_at: new Date()
-        }
-    });
+    try {
+        await prisma.auditLog.create({
+            data: {
+                action,
+                student: {
+                    connect: { m03_id: studentId }
+                },
+                teacher: {
+                    connect: { m01_id: performedBy }
+                },
+                changes,
+                created_at: new Date()
+            }
+        });
+    } catch (error) {
+        console.error('Error logging audit:', error);
+        throw error; // Re-throw to handle in the calling function
+    }
 };
 
 exports.createStudent = [
@@ -121,7 +130,7 @@ exports.createStudent = [
             // Convert contact_number to string for JSON response
             const responseData = {
                 ...newStudent,
-                m03_contact_number: newStudent.m03_contact_number.toString(),
+                m03_contact_number: newStudent.m03_contact_number.toString()
             };
 
             return res.status(201).json({
@@ -407,7 +416,7 @@ exports.deleteStudent = async (req, res) => {
     } catch (error) {
         console.error('Error during student deletion:', error);
         return res.status(500).json({
-            error: error.message || 'An error occurred while deleting the黄学生'
+            error: error.message || 'An error occurred while deleting the student'
         });
     }
 };
