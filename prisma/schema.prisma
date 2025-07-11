@@ -1,0 +1,70 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  Male
+  Female
+  Other
+}
+
+model m01_teacher {
+  m01_id             Int         @id @default(autoincrement())
+  m01_name           String
+  m01_email          String      @unique
+  m01_contact_number String      @unique
+  m01_password       String
+  m01_profile_photo  String? // Cloudinary
+  m01_is_admin       Boolean     @default(false)
+  m01_created_at     DateTime    @default(now())
+  m01_updated_at     DateTime    @updatedAt
+  m01_classes        m02_class[] @relation("TeacherClasses")
+
+  @@map("m01_teacher")
+}
+
+model m02_class {
+  m02_id             Int           @id @default(autoincrement())
+  m02_name           String
+  m02_subject        String
+  m02_year           Int
+  m02_m01_teacher_id Int
+  m02_m01_teacher    m01_teacher   @relation("TeacherClasses", fields: [m02_m01_teacher_id], references: [m01_id])
+  m02_m03_students   m03_student[] @relation("ClassStudents")
+  created_at         DateTime      @default(now())
+  updated_at         DateTime      @updatedAt
+
+  @@map("m02_class")
+}
+
+model m03_student {
+  m03_id              Int         @id @default(autoincrement())
+  m03_name            String
+  m03_email           String      @unique
+  m03_contact_number  String      @unique
+  m03_profile_photo   String? // Cloudinary 
+  m03_gender          Gender      @default(Male)
+  m03_enrollment_date DateTime    @default(now())
+  created_at          DateTime    @default(now())
+  updated_at          DateTime    @updatedAt
+  m03_m02_classes     m02_class[] @relation("ClassStudents")
+  audit_logs          AuditLog[]  @relation("StudentAuditLogs")
+
+  @@map("m03_student")
+}
+
+model AuditLog {
+  id           Int         @id @default(autoincrement())
+  action       String      //create, edit, delete
+  student_id   Int
+  student      m03_student @relation("StudentAuditLogs", fields: [student_id], references: [m03_id], onDelete: NoAction, onUpdate: NoAction)
+  performed_by Int
+  changes      Json?
+  created_at   DateTime    @default(now())
+}
