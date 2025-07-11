@@ -24,9 +24,7 @@ const logAudit = async (action, studentId, performedBy, changes = null) => {
         await prisma.auditLog.create({
             data: {
                 action,
-                student: {
-                    connect: { m03_id: studentId }
-                },
+                student_id: studentId, 
                 performed_by: performedBy,
                 changes,
                 created_at: new Date()
