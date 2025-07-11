@@ -26,9 +26,7 @@ const logAudit = async (action, studentId, performedBy, changes = null) => {
                 student: {
                     connect: { m03_id: studentId }
                 },
-                teacher: {
-                    connect: { m01_id: performedBy }
-                },
+                performed_by: performedBy,
                 changes,
                 created_at: new Date()
             }
