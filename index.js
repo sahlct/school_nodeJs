@@ -7,16 +7,15 @@ const app = express();
 
 app.use(express.json());
 
-const corsOptions = {
-  origin: 'http://localhost:3000',
+// Allow all CORS
+app.use(cors({
+  origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-};
+}));
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+// If using credentials (cookies/auth), do **NOT** use `origin: '*'` — see note below.
+app.options('*', cors());
 
-// API routes
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/teachers', require('./routes/teacherRoutes'));
 app.use('/classes', require('./routes/classRoutes'));
