@@ -24,15 +24,17 @@ const logAudit = async (action, studentId, performedBy, changes = null) => {
         await prisma.auditLog.create({
             data: {
                 action,
-                student_id: studentId, 
+                student: {
+                    connect: { m03_id: studentId }
+                },
                 performed_by: performedBy,
-                changes,
-                created_at: new Date()
+                changes
             }
         });
     } catch (error) {
         console.error('Error logging audit:', error);
-        throw error;
+        // Don't throw the error to prevent breaking the main operation
+        // Just log it and continue
     }
 };
 
